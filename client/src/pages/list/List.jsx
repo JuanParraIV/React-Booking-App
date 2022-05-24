@@ -14,6 +14,7 @@ export const List = () => {
   const [date, setDate] = useState(location.state.date);
   const [openDate, setOpenDate] = useState(false);
   const [options, setoptions] = useState(location.state.options);
+  console.log(location.state.date);
   return (
     <div>
       <Navbar />
