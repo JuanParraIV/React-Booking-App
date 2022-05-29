@@ -1,4 +1,5 @@
 import Hotel from "../models/Hotel.js";
+import Room from "../models/Room.js";
 
 //CREATE A NEW HOTEL
 export const createHotel = async (req, res, next) => {
@@ -55,8 +56,7 @@ export const getAllHotels = async (req, res, next) => {
   try {
     const hotels = await Hotel.find({
       ...others,
-      cheapestPrice: { $gt: min | 1, $lt: max | 999
-      },
+      cheapestPrice: { $gt: min || 1, $lt: max || 999 },
     }).limit(req.query.limit);
     res.status(200).json(hotels);
   } catch (err) {
@@ -96,3 +96,19 @@ export const countByType = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getHotelRooms = async (req, res, next) => {
+  const id = req.params.id;
+  try {
+    const hotel = await Hotel.findById(id);
+    const list = await Promise.all(
+      hotel.rooms.map((room) => {
+        return Room.findById(room);
+      }
+      )
+    );
+    res.status(200).json(list);
+  } catch (err) {
+    next(err);
+  }
+}

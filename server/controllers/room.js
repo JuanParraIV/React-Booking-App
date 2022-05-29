@@ -3,24 +3,21 @@ import Hotel from "../models/Hotel.js";
 import { createError } from "../utils/error.js";
 
 export const createRoom = async (req, res, next) => {
-
   const { hotelId } = req.params;
   const newRoom = new Room(req.body);
+  try {
+    const savedRoom = await newRoom.save();
     try {
-
-        const savedRoom = await newRoom.save();
-        try {
-          await Hotel.findByIdAndUpdate(hotelId, {
-            $push: { rooms: savedRoom._id },
-          });
-      
-        } catch (error) {
-          next(error);
-        }
-        res.status(201).json(savedRoom);
+      await Hotel.findByIdAndUpdate(hotelId, {
+        $push: { rooms: savedRoom._id },
+      });
     } catch (error) {
-        next(error);
+      next(error);
     }
+    res.status(201).json(savedRoom);
+  } catch (error) {
+    next(error);
+  }
 };
 
 //UPDATE (PUT)
@@ -37,7 +34,22 @@ export const updateRoom = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
+};
+export const updateRoomAvailability = async (req, res, next) => {
+  try {
+    await Room.updateOne(
+      { "roomNumbers._id": req.params.id },
+      {
+        $push: {
+          "roomNumbers.$.unavailableDates": req.body.dates,
+        },
+      }
+    );
+    res.status(200).json("Room status has been updated")
+  } catch (err) {
+    next(err);
+  }
+};
 
 //DELETE    /api/Rooms/:id
 export const deleteRoom = async (req, res, next) => {
@@ -49,7 +61,6 @@ export const deleteRoom = async (req, res, next) => {
       await Hotel.findByIdAndUpdate(hotelId, {
         $pull: { rooms: id },
       });
-  
     } catch (error) {
       next(error);
     }
@@ -57,12 +68,10 @@ export const deleteRoom = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
-
+};
 
 //GET   - one Room
 export const getRoom = async (req, res, next) => {
-  
   const id = req.params.id;
   try {
     const room = await Room.findById(id);
@@ -70,9 +79,7 @@ export const getRoom = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
-
-
+};
 
 //GET ALL (all Rooms)
 export const getAllRooms = async (req, res, next) => {
@@ -82,4 +89,4 @@ export const getAllRooms = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
+};
